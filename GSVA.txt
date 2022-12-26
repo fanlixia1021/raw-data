@@ -1,0 +1,19 @@
+rm(list=ls())
+suppressMessages(library(GSVA))
+suppressMessages(library(GSVAdata))
+suppressMessages(library(GSEABase))
+suppressMessages(library(limma))
+gmt_file="c6.all.v7.4.symbols.gmt"
+geneset <- getGmt(gmt_file)  
+exp <- read.delim("geneexpression.txt",row.names = 1)
+es <- gsva(as.matrix(exp), geneset,
+                    min.sz=10, max.sz=500, verbose=TRUE)
+design <- model.matrix(~ factor(c(rep("cont",42),rep("treatment",42))))
+colnames(design) <- c("ALL", "contvstreatment")
+row.names(design)<-colnames(exp)
+fit <- lmFit(es, design)
+fit <- eBayes(fit)
+allGeneSets <- topTable(fit, coef="contvstreatment", number=Inf)
+write.csv(allGeneSets,"pathway-deg.csv")
+write.csv(es,"pathway.csv")
+

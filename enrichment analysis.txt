@@ -1,0 +1,25 @@
+library(DOSE)
+library(enrichplot)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+https://www.jianshu.com/p/3c5de0c4ca7
+ego <- enrichGO( gene  = a$ENTREZID,    
+keyType ="ENTREZID",         
+OrgDb   = org.Hs.eg.db,     
+ont     = "CC",          
+pAdjustMethod = "BH",     
+pvalueCutoff  = 0.05,          
+qvalueCutoff  = 0.05,          
+readable  = TRUE)
+ekegg <- enrichKEGG(gene = a$ENTREZID)
+edo<- enrichDO(gene = a$ENTREZID,readable = TRUE)
+cnetplot(ego, foldChange=a$LFC, circular = TRUE, colorEdge = TRUE,showCategory = 10)
+
+cell_markers <- vroom::vroom('http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/Human_cell_markers.txt') %>%
+  tidyr::unite("cellMarker", tissueType, cancerType, cellName, sep=", ") %>% 
+  dplyr::select(cellMarker, geneID) %>%
+  dplyr::mutate(geneID = strsplit(geneID, ', '))
+cell_markers
+eTC <- enricher(a$ENTREZID, TERM2GENE=cell_markers, minGSSize=1)
+
+y <- c("Fatty acid biosynthesis","Fatty acid metabolism","PPAR signaling pathway","Insulin signaling pathway","Fatty acid degradation","Glucagon signaling pathway","Insulin resistance")
